@@ -1,0 +1,17 @@
+
+Ava Eclipse ja veendu, et egit-moodul on olemas, vajadusel lisa see Eclipse Marketplace kaudu.
+
+Lisa projekti vaatesse git repositooriumite aken: 
+Window -> Show View -> Other... -> Git -> Git Repositories
+
+Git Repositories aknas klooni vajalik repositoorium bitbucket-ist.
+
+Loo Java projekt.
+
+Kustuta src kataloog.
+
+vali "Build Path -> Link Source" ja seo projekti source kloonimisest tekkinud 
+lokaalse repositooriumiga, pane Eclipse projektis selle kataloogi nimeks src.
+
+Majanda versioonihaldusega ainult git repositooriumite aknas.
+
