@@ -200,11 +200,49 @@ public class Huffman {
 		
 		// create output buffer
 		byte[] result = new byte[this.calculateOutbytes()];
+						
+		int currentlength = 8, currentbyte = 0, shift = 0, position = 0;
+		Node n;
+		// encode data 
+		for (int i = 0; i < origData.length; i++) {
+			// get frequency and bitlength information
+			n = this.leaves[origData[i] & 0xFF]; 
+			if (n == null) {
+				throw new RuntimeException("Error in frequency table mapping!");
+			}
+			int a = n.bitmask;
+			
+			shift = currentlength - n.bitlength;
+			System.out.println("Shift is " + shift );
+			
+			System.out.printf("Current byte: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
+			System.out.printf("Adding: %d %d '%s' \n", a, (byte)a, Integer.toBinaryString(a));
+			// overflows
+			if (shift <= 0) {
+				System.out.println("===============================================");
+				a = a >> -shift; // move to right
+				
+				currentbyte = currentbyte & a;
+				System.out.printf("Current byte after adding: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
+				result[position] = (byte)currentbyte;
+				position++;
+				currentbyte = 0;
+				a = n.bitmask << 8+shift;
+				currentbyte = a;
+				currentlength = 8+shift+n.bitlength;
+				System.out.printf("Current byte restarted: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
+				
+			} else {
+				a = a << shift;
+				currentlength = currentlength - n.bitlength;
+				currentbyte = currentbyte & a;
+				System.out.printf("2Current byte after adding: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
+			}									
+		}
 		
-		
-		
-		int currentlength, currentbyte;
-		
+		if (currentlength > 0) {
+			result[position] = (byte)currentbyte;
+		}
 		
 		return null; // TODO!!!
 	}
@@ -239,7 +277,13 @@ public class Huffman {
 
 		System.out.println((bbb & 0xFF));
 		System.out.println((bbb));
+		int mm = 1;
+		mm = mm << 8;
+		System.out.println(mm);
 		
+		int x = 129;
+		byte xx;
+		System.out.printf("int %d byte %d\n", (int)x, (byte) x);
 		System.out.println( (int)Math.ceil((120 / 13.0)));
 		
 
