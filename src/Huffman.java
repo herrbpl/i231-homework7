@@ -8,6 +8,7 @@ public class Huffman {
 
 	private Node[] leaves = null; // acts as frequency table
 	private Node root = null; // tree root.
+	
 	// TODO!!! Your instance variables here!
 	// we need only 256 possible positions in tree as there are 256 possible
 	// symbols. We dont care about unicode here i think. Just bytes.
@@ -15,11 +16,18 @@ public class Huffman {
 
 	public  class Node {
 		int frequency;
-		byte data;		
+		byte data;
+		int bitlength;
+		int bitmask;
 		Node right = null;
 		Node left = null;
 		boolean isLeaf() {
 			return (right == null && left == null);
+		}
+		// return data back as index;
+		int index() {
+			if (!this.isLeaf()) return -1; // not sure if i should return this.
+			return data & 0xFF;
 		}
 		@Override
 		public String toString() {
@@ -27,15 +35,28 @@ public class Huffman {
 			return String.format("%s %d %d", (char)data, data & 0xFF, frequency );
 		}
 	
-		void walkTree(String p, int bl) {
+		/** 
+		 * Builds mapping table for decoding
+		 * @param p
+		 * @param bm
+		 * @param bl
+		 * @param codetable
+		 */
+		void walkTree(String p, int bm, int bl, Node[] codetable) {
 			if (this.isLeaf() ) {
-				System.out.printf("%s bitlength %d\n", this.toString() + " = " + p, bl );
+				this.bitlength = bl;
+				this.bitmask = bm;
+				codetable[this.index()] = this;
+				System.out.printf("%s bitlength %d %d '%s'\n", this.toString() + " = " + p, bl, this.bitmask, Integer.toBinaryString(this.bitmask) );
 			} else {
 				if (this.left != null) {
-					this.left.walkTree(p+"0", bl+1);
+					bm = bm << 1; // shift to left
+					this.left.walkTree(p+"0", bm,  bl+1, codetable);
 				}
-				if (this.right != null) {
-					this.right.walkTree(p+"1", bl+1);
+				if (this.right != null) {					
+					bm = bm+1; // add single digit to end
+					
+					this.right.walkTree(p+"1", bm, bl+1, codetable);
 				}
 			}
 		}
@@ -96,26 +117,26 @@ public class Huffman {
 			min1 = findMin(workarray);
 			if (min1 == -1) {
 				finished = true;
-				System.out.printf("Found nothing\n");
+				// System.out.printf("Found nothing\n");
 				// 
 				return null;
 			} else {
 				nl = workarray[min1];
 				workarray[min1] = null;
-				System.out.printf("Found left, %s\n", nl);
+		//		System.out.printf("Found left, %s\n", nl);
 				
 				// find min2
 				min2 = findMin(workarray);
 				if (min2 == -1) {
 					// nl is root
 					finished = true;
-					System.out.printf("Right not found, returning root %s\n", nl);
+					// System.out.printf("Right not found, returning root %s\n", nl);
 					
 					return nl;
 				} else {
 					nr = workarray[min2];
 					workarray[min2] = null;
-					System.out.printf("Found right, %s\n", nr);
+					// System.out.printf("Found right, %s\n", nr);
 					// lets find sum of those frequencies
 					np = new Node();
 					np.frequency = nl.frequency+nr.frequency;
@@ -123,7 +144,7 @@ public class Huffman {
 					np.right = nr;
 					// insert back into array
 					workarray[min1] = np;
-					System.out.printf("created root, %s\n", np);
+					// System.out.printf("created root, %s\n", np);
 				}								
 			}
 		} // while
@@ -134,11 +155,11 @@ public class Huffman {
 	 * Constructor to build the Huffman code for a given bytearray.
 	 * 
 	 * @param original
-	 *            source data
+	 *            source data 
 	 */
 	Huffman(byte[] original) {
 		// TODO!!! Your constructor here!
-
+		// We do nothing here.
 	}
 
 	/**
@@ -147,7 +168,13 @@ public class Huffman {
 	 * @return number of bits
 	 */
 	public int bitLength() {
-		return 0; // TODO!!!
+		int resultbits = 0;
+		for (int i = 0; i < leaves.length; i++) {
+			if (leaves[i] != null) {
+				resultbits += leaves[i].bitlength*leaves[i].frequency;
+			}
+		}
+		return resultbits;
 	}
 
 	/**
@@ -158,8 +185,41 @@ public class Huffman {
 	 * @return encoded data
 	 */
 	public byte[] encode(byte[] origData) {
+		
+		// build frequency table
+		Node[] nn = buildFrequencyTable(origData);
+		
+		// reset this leaves
+		this.leaves = new Node[256];
+		
+		// build tree
+		this.root = buildTree(nn);
+		
+		// create code table in leaves. 
+		this.root.walkTree("", 0, 0, this.leaves);
+		
+		// create output buffer
+		byte[] result = new byte[this.calculateOutbytes()];
+		
+		
+		
+		int currentlength, currentbyte;
+		
+		
 		return null; // TODO!!!
 	}
+
+	/**
+	 * Calculates length of bytes needed for output buffer given data in input
+	 * @return
+	 */
+	private int calculateOutbytes() {
+		// TODO Auto-generated method stub
+		
+		
+		return (int) Math.ceil(this.bitLength() / 8.0);
+	}
+
 
 	/**
 	 * Decoding the byte array using this prefixcode.
@@ -180,7 +240,7 @@ public class Huffman {
 		System.out.println((bbb & 0xFF));
 		System.out.println((bbb));
 		
-		
+		System.out.println( (int)Math.ceil((120 / 13.0)));
 		
 
 		String tekst = "AAAAAAAAAAAAABBBBBBCCCDDEEF";
@@ -194,7 +254,7 @@ public class Huffman {
 		
 		Node[] nn = huf.buildFrequencyTable(orig);
 		
-		
+		huf.leaves = new Node[256];
 		
 		Node root = huf.buildTree(nn);
 		
@@ -202,7 +262,7 @@ public class Huffman {
 			System.out.println(nn[i]);
 		}
 		
-		root.walkTree("",0);
+		root.walkTree("",0, 0, huf.leaves);
 		
 		int i1, i2;
 		
