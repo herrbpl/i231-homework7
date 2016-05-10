@@ -177,6 +177,11 @@ public class Huffman {
 		return resultbits;
 	}
 
+	private String bitStr(int i) {
+		int mask = 0x8000;
+		return Integer.toBinaryString(i | mask).substring(8, 16);
+	}
+	
 	/**
 	 * Encoding the byte array using this prefixcode.
 	 * 
@@ -201,7 +206,7 @@ public class Huffman {
 		// create output buffer
 		byte[] result = new byte[this.calculateOutbytes()];
 						
-		int currentlength = 8, currentbyte = 0, shift = 0, position = 0;
+		int currentlength = 0, currentbyte = 0, shift = 0, position = 0;
 		Node n;
 		// encode data 
 		for (int i = 0; i < origData.length; i++) {
@@ -211,32 +216,28 @@ public class Huffman {
 				throw new RuntimeException("Error in frequency table mapping!");
 			}
 			int a = n.bitmask;
-			
-			shift = currentlength - n.bitlength;
-			System.out.println("Shift is " + shift );
-			
-			System.out.printf("Current byte: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
-			System.out.printf("Adding: %d %d '%s' \n", a, (byte)a, Integer.toBinaryString(a));
-			// overflows
-			if (shift <= 0) {
-				System.out.println("===============================================");
-				a = a >> -shift; // move to right
+			System.out.printf("Current value  %d '%s', length %d\n", currentbyte, bitStr(currentbyte), currentlength );
+			System.out.printf("Adding  %d '%s'\n", a, bitStr(a) );
+			// if there is room left in byte, fill it.
+			if (n.bitlength + currentlength <= 8) {
+				a = a << (8 - currentlength - n.bitlength);
+				currentlength = currentlength + n.bitlength;
+				currentbyte = currentbyte | a;				
+				System.out.printf("C1 Value after adding %d '%s'\n", currentbyte, bitStr(currentbyte) );
+			} else { // new bitlength does not fit into current byte. We have to split it between two bytes.
 				
-				currentbyte = currentbyte & a;
-				System.out.printf("Current byte after adding: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
+				System.out.println("-----------------------------------------------------------------------------");
+			    int over = -((8 - currentlength) - n.bitlength);
+			    System.out.printf("Room left %d, length %d, over %d\n", 8-currentlength, currentlength, over);
+			    //a = a >>> (n.bitlength - over);
+				a = a >>> over;
+				currentbyte = currentbyte | a;
+				System.out.printf("Storing %d '%s'\n", currentbyte, bitStr(currentbyte) );
 				result[position] = (byte)currentbyte;
 				position++;
-				currentbyte = 0;
-				a = n.bitmask << 8+shift;
-				currentbyte = a;
-				currentlength = 8+shift+n.bitlength;
-				System.out.printf("Current byte restarted: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
-				
-			} else {
-				a = a << shift;
-				currentlength = currentlength - n.bitlength;
-				currentbyte = currentbyte & a;
-				System.out.printf("2Current byte after adding: %d %d '%s' \n", currentbyte, (byte)currentbyte, Integer.toBinaryString(currentbyte));
+				currentbyte = (n.bitmask << (8 - over)) & 0x00FF;
+				currentlength = over;
+				System.out.printf("C2 Value after adding %d '%s'\n", currentbyte, bitStr(currentbyte) );
 			}									
 		}
 		
