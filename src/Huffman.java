@@ -44,6 +44,7 @@ public class Huffman {
 		 */
 		void walkTree(String p, int bm, int bl, Node[] codetable) {
 			if (this.isLeaf() ) {
+				if (bl == 0 ) bl = bl+1;
 				this.bitlength = bl;
 				this.bitmask = bm;
 				codetable[this.index()] = this;
@@ -245,7 +246,7 @@ public class Huffman {
 			result[position] = (byte)currentbyte;
 		}
 		
-		return null; // TODO!!!
+		return result; // TODO!!!
 	}
 
 	/**
@@ -274,55 +275,13 @@ public class Huffman {
 	/** Main method. */
 	public static void main(String[] params) {
 
-		byte bbb = -1;
-
-		System.out.println((bbb & 0xFF));
-		System.out.println((bbb));
-		int mm = 1;
-		mm = mm << 8;
-		System.out.println(mm);
-		
-		int x = 129;
-		byte xx;
-		System.out.printf("int %d byte %d\n", (int)x, (byte) x);
-		System.out.println( (int)Math.ceil((120 / 13.0)));
-		
 
 		String tekst = "AAAAAAAAAAAAABBBBBBCCCDDEEF";
+		//String tekst = "A";
 		byte[] orig = tekst.getBytes();
 		
-		
-		
-		
-		
 		Huffman huf = new Huffman(orig);
-		
-		Node[] nn = huf.buildFrequencyTable(orig);
-		
-		huf.leaves = new Node[256];
-		
-		Node root = huf.buildTree(nn);
-		
-		for (int i = 0; i < nn.length; i++) {
-			System.out.println(nn[i]);
-		}
-		
-		root.walkTree("",0, 0, huf.leaves);
-		
-		int i1, i2;
-		
-		i1 = 1;
-		System.out.println(i1);
-		i1 = i1 << 1;
-		System.out.println(i1);
-		
-		i1 = i1 << 1;		
-		System.out.println(i1);
-		i1 = i1 + 1;
-		
-		System.out.println(i1);
-		i1 = i1 >> 1;
-		System.out.println(i1);
+			
 		
 		
 		byte[] kood = huf.encode(orig);
