@@ -204,10 +204,19 @@ public class Huffman {
 		// create code table in leaves. 
 		this.root.walkTree("", 0, 0, this.leaves);
 		
+		 
+		
 		// create output buffer
 		byte[] result = new byte[this.calculateOutbytes()];
-						
+		
+		System.out.println("total length of output is in bytes: "+ result.length);
+		
+		
 		int currentlength = 0, currentbyte = 0, shift = 0, position = 0;
+		
+		// into first three bits, we add length of padding bits in the end.
+		currentlength = 3;
+		
 		Node n;
 		// encode data 
 		for (int i = 0; i < origData.length; i++) {
@@ -242,22 +251,39 @@ public class Huffman {
 			}									
 		}
 		
+		int paddinglength = (8 - currentlength);
+		
+		System.out.printf("Padding length: %d, '%s',  first byte: '%s'\n", paddinglength, bitStr(paddinglength),bitStr((int)result[0]));
+		
+		paddinglength = paddinglength << 5;
+		
+		System.out.println(bitStr(paddinglength));
+		System.out.println(bitStr((int)result[0] | paddinglength));
+		
+		result[0] =  (byte)( ((int)result[0] | paddinglength) );
+		
+		
+		
 		if (currentlength > 0) {
 			result[position] = (byte)currentbyte;
+			// add padding length add beginning
+			
 		}
+		
+		System.out.printf("Padding length: %d, first byte: '%s'\n", paddinglength, bitStr((int)result[0] & 0xFF));
 		
 		return result; // TODO!!!
 	}
 
 	/**
-	 * Calculates length of bytes needed for output buffer given data in input
+	 * Calculates length of bytes needed for output buffer given data in input. First three bits are padding length required. 
 	 * @return
 	 */
 	private int calculateOutbytes() {
 		// TODO Auto-generated method stub
 		
 		
-		return (int) Math.ceil(this.bitLength() / 8.0);
+		return (int) Math.ceil((this.bitLength()+3) / 8.0);
 	}
 
 
@@ -267,11 +293,45 @@ public class Huffman {
 	 * @param encodedData
 	 *            encoded data
 	 * @return decoded data (hopefully identical to original)
+	 * TODO: add dictionary export/import
 	 */
 	public byte[] decode(byte[] encodedData) {
+		if (this.root == null) {
+			throw new RuntimeException("Dictionary missing, run encode first");
+		}
+		
+		if (encodedData.length == 0) {
+			return null;
+		}
+		
+		// we do not know input length in bits. Should we include this in header? padding length of last byte?
+		
+		// get length of padding in last byte.		
+		int paddinglength = (encodedData[0] & 0xFF) >>> 5;
+		System.out.printf("Decoding Padding length: %d '%s'\n", paddinglength, bitStr(paddinglength) );
+		
+		// i need to know size for output array;
+		int currentlength = 3;
+		int workarea = 0;
+		
+		// max length of encoding in tree?
+		int maxcodelength = 4; // get from root.
+		
+		for (int i = 0; i < encodedData.length; i++) {
+			int firstbyte = encodedData[i] & 0xFF;
+			int secondbyte = 0;
+			if (i < encodedData.length-1) {
+				secondbyte = encodedData[i+1] & 0xFF;
+			}
+			// bit
+			
+		}
+		
+		
 		return null; // TODO!!!
 	}
-
+	
+	
 	/** Main method. */
 	public static void main(String[] params) {
 
@@ -285,6 +345,7 @@ public class Huffman {
 		
 		
 		byte[] kood = huf.encode(orig);
+				
 		byte[] orig2 = huf.decode(kood);
 		// must be equal: orig, orig2
 		System.out.println(Arrays.equals(orig, orig2));
