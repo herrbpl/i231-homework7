@@ -94,6 +94,28 @@ public class Huffman {
 			return -1;
 		}
 
+		/**
+		 * Gets maximum code length in bits in frequency tree/table
+		 * @param i
+		 * @return
+		 */
+		public int maxCodeLength(int i) {
+			// TODO Auto-generated method stub
+			
+			if (this.isLeaf()) {
+				return i;
+			}
+			
+			int l = i, r = i;
+			if (this.left != null) {
+				l = this.left.maxCodeLength(i+1);
+			}
+			if (this.right != null) {
+				r = this.right.maxCodeLength(i+1);
+			}
+			return Math.max(l, r);
+		}
+
 	}
 
 	// returns node with minimal frequency
@@ -345,7 +367,9 @@ public class Huffman {
 		int workarea = 0;
 
 		// max length of encoding in tree?
-		int maxcodelength = 4; // get from root.
+		int maxcodelength = root.maxCodeLength(0); // get from root.
+		System.out.println("Max code length: " + maxcodelength);
+		
 		int databitlength = this.bitLength();
 		int bitcounter = 0;
 
