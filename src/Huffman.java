@@ -69,18 +69,28 @@ public class Huffman {
 			}
 		}
 
+		/**
+		 * Finds if given input is found in tree leaves.
+		 * @param workarea - bit combination to search
+		 * @return -1 if not found, data byte as int when found (You must convert to byte)
+		 */
 		public int findNode(int workarea) {
-			if (this.isLeaf() && this.bitmask == workarea) return this.data;
 			
-			if (this.left != null) {
-				
-				return this.left.findNode(workarea);
+			int result;
+			
+			if (this.isLeaf()) {				
+				if (this.bitmask == workarea) return this.data;
 			}
-			if (this.right != null) {
-				return this.right.findNode(workarea);
+			
+			if (this.left != null) {				
+				result = this.left.findNode(workarea);
+				if (result != -1) return result;
+			}
+			if (this.right != null) {								
+				result = this.right.findNode(workarea);
+				if (result != -1) return result;
 			}
 
-			// TODO Auto-generated method stub
 			return -1;
 		}
 
