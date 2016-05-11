@@ -54,8 +54,6 @@ public class Huffman {
 				this.bitlength = bl;
 				this.bitmask = bm;
 				codetable[this.index()] = this;
-				System.out.printf("%s bitlength %d %d '%s'\n", this.toString() + " = " + p, bl, this.bitmask,
-						Integer.toBinaryString(this.bitmask));
 			} else {
 				if (this.left != null) {
 					bm = bm << 1; // shift to left
@@ -264,7 +262,7 @@ public class Huffman {
 		// create output buffer
 		byte[] result = new byte[this.calculateOutbytes()];
 
-		System.out.println("total length of output is in bytes: " + result.length);
+//		System.out.println("total length of output is in bytes: " + result.length);
 
 		int currentlength = 0, currentbyte = 0, shift = 0, position = 0;
 
@@ -280,41 +278,41 @@ public class Huffman {
 				throw new RuntimeException("Error in frequency table mapping!");
 			}
 			int a = n.bitmask;
-			System.out.printf("Current value  %d '%s', length %d\n", currentbyte, bitStr(currentbyte), currentlength);
-			System.out.printf("Adding  %d '%s'\n", a, bitStr(a));
+//			System.out.printf("Current value  %d '%s', length %d\n", currentbyte, bitStr(currentbyte), currentlength);
+//			System.out.printf("Adding  %d '%s'\n", a, bitStr(a));
 			// if there is room left in byte, fill it.
 			if (n.bitlength + currentlength <= 8) {
 				a = a << (8 - currentlength - n.bitlength);
 				currentlength = currentlength + n.bitlength;
 				currentbyte = currentbyte | a;
-				System.out.printf("C1 Value after adding %d '%s'\n", currentbyte, bitStr(currentbyte));
+//				System.out.printf("C1 Value after adding %d '%s'\n", currentbyte, bitStr(currentbyte));
 			} else { // new bitlength does not fit into current byte. We have to
 						// split it between two bytes.
 
-				System.out.println("-----------------------------------------------------------------------------");
+//				System.out.println("-----------------------------------------------------------------------------");
 				int over = -((8 - currentlength) - n.bitlength);
-				System.out.printf("Room left %d, length %d, over %d\n", 8 - currentlength, currentlength, over);
+//				System.out.printf("Room left %d, length %d, over %d\n", 8 - currentlength, currentlength, over);
 				// a = a >>> (n.bitlength - over);
 				a = a >>> over;
 				currentbyte = currentbyte | a;
-				System.out.printf("Storing %d '%s'\n", currentbyte, bitStr(currentbyte));
+//				System.out.printf("Storing %d '%s'\n", currentbyte, bitStr(currentbyte));
 				result[position] = (byte) currentbyte;
 				position++;
 				currentbyte = (n.bitmask << (8 - over)) & 0x00FF;
 				currentlength = over;
-				System.out.printf("C2 Value after adding %d '%s'\n", currentbyte, bitStr(currentbyte));
+//				System.out.printf("C2 Value after adding %d '%s'\n", currentbyte, bitStr(currentbyte));
 			}
 		}
 
 		int paddinglength = (8 - currentlength);
 
-		System.out.printf("Padding length: %d, '%s',  first byte: '%s'\n", paddinglength, bitStr(paddinglength),
-				bitStr((int) result[0]));
+//		System.out.printf("Padding length: %d, '%s',  first byte: '%s'\n", paddinglength, bitStr(paddinglength),
+//				bitStr((int) result[0]));
 
 		paddinglength = paddinglength << 5;
 
-		System.out.println(bitStr(paddinglength));
-		System.out.println(bitStr((int) result[0] | paddinglength));
+//		System.out.println(bitStr(paddinglength));
+//		System.out.println(bitStr((int) result[0] | paddinglength));
 
 		result[0] = (byte) (((int) result[0] | paddinglength));
 
@@ -324,7 +322,7 @@ public class Huffman {
 
 		}
 
-		System.out.printf("Padding length: %d, first byte: '%s'\n", paddinglength, bitStr((int) result[0] & 0xFF));
+//		System.out.printf("Padding length: %d, first byte: '%s'\n", paddinglength, bitStr((int) result[0] & 0xFF));
 
 		return result; // TODO!!!
 	}
@@ -363,7 +361,7 @@ public class Huffman {
 
 		// get length of padding in last byte.
 		int paddinglength = (encodedData[0] & 0xFF) >>> 5;
-		System.out.printf("Decoding Padding length: %d '%s'\n", paddinglength, bitStr(paddinglength));
+//		System.out.printf("Decoding Padding length: %d '%s'\n", paddinglength, bitStr(paddinglength));
 
 		// i need to know size for output array;
 		int currentcodelength = 0;
@@ -394,12 +392,12 @@ public class Huffman {
 
 						int decodedbyte = root.findNode(workarea);
 						if (decodedbyte >= 0) {
-							System.out.printf("input code %s mapped to %d\n", bitStr(workarea), decodedbyte);
+//							System.out.printf("input code %s mapped to %d\n", bitStr(workarea), decodedbyte);
 							al.add((byte)decodedbyte);
 							currentcodelength = 0;
 							workarea = 0;
 						} else {
-							System.out.printf("input code %s not mapped to anything\n", bitStr(workarea));
+//							System.out.printf("input code %s not mapped to anything\n", bitStr(workarea));
 						}
 					} else {
 						throw new RuntimeException("Code length exceeds maximum code length in dictionary");
@@ -418,7 +416,7 @@ public class Huffman {
 			result[i] = al.get(i);
 		}
 		
-		System.out.println(new String(result));
+//		System.out.println(new String(result));
 		
 		return result; // TODO!!!
 	}
