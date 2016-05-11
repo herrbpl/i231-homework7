@@ -103,7 +103,7 @@ public class Huffman {
 			// TODO Auto-generated method stub
 			
 			if (this.isLeaf()) {
-				return i;
+				return i+1;
 			}
 			
 			int l = i, r = i;
@@ -213,6 +213,9 @@ public class Huffman {
 	 *            source data
 	 */
 	Huffman(byte[] original) {
+		if (original == null) {
+			throw new RuntimeException("Empty input");
+		}
 		// TODO!!! Your constructor here!
 		// We do nothing here.
 	}
@@ -367,11 +370,11 @@ public class Huffman {
 		int workarea = 0;
 
 		// max length of encoding in tree?
-		int maxcodelength = root.maxCodeLength(0); // get from root.
-		System.out.println("Max code length: " + maxcodelength);
-		
+		int maxcodelength = root.maxCodeLength(0); // get from root.				
 		int databitlength = this.bitLength();
 		int bitcounter = 0;
+		
+		ArrayList<Byte> al = new ArrayList<Byte>();
 
 		// iterate over bytes
 		for (int i = 0; i < encodedData.length; i++) {
@@ -380,7 +383,7 @@ public class Huffman {
 			for (int j = 7; j >= 0; j--) {
 				bitcounter++;
 				// only if we are not in header area or padding
-				if ((bitcounter > 3) && ((bitcounter - 3) < databitlength)) {
+				if ((bitcounter > 3) && ((bitcounter - 3) <= databitlength)) {
 					boolean bit = ((b & (1 << j)) == (1 << j));
 					if (currentcodelength < maxcodelength) {
 						currentcodelength++;
@@ -392,6 +395,7 @@ public class Huffman {
 						int decodedbyte = root.findNode(workarea);
 						if (decodedbyte >= 0) {
 							System.out.printf("input code %s mapped to %d\n", bitStr(workarea), decodedbyte);
+							al.add((byte)decodedbyte);
 							currentcodelength = 0;
 							workarea = 0;
 						} else {
@@ -408,7 +412,15 @@ public class Huffman {
 
 		}
 
-		return null; // TODO!!!
+		byte[] result = new byte[al.size()];
+		
+		for (int i = 0; i < al.size(); i++) { 
+			result[i] = al.get(i);
+		}
+		
+		System.out.println(new String(result));
+		
+		return result; // TODO!!!
 	}
 
 	/** Main method. */
